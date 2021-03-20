@@ -34,7 +34,7 @@ func PinsGet(c *gin.Context) {
 	results := []PinStatus{}
 
 	if Cid != "" {
-		res := db.Collection.FindOne(db.Ctx, bson.M{
+		res := db.Pins.FindOne(db.Ctx, bson.M{
 			"cid":   Cid,
 			"owner": user,
 		})
@@ -67,7 +67,7 @@ func PinsGet(c *gin.Context) {
 	}
 
 	if Cid == "" {
-		res, err := db.Collection.Find(db.Ctx, bson.M{
+		res, err := db.Pins.Find(db.Ctx, bson.M{
 			"owner": user,
 		})
 
@@ -127,11 +127,7 @@ func PinsPost(c *gin.Context) {
 		return
 	}
 
-	res, err := db.Collection.InsertOne(db.Ctx, db.Pin{
-		Cid:   inputData.Cid,
-		Name:  inputData.Name,
-		Owner: user,
-	})
+	res, err := addPin(inputData, user)
 	if err != nil {
 		sendErr(c, err)
 		return
@@ -163,7 +159,7 @@ func PinsRequestidDelete(c *gin.Context) {
 		return
 	}
 
-	_, err = db.Collection.DeleteOne(db.Ctx, bson.M{
+	_, err = db.Pins.DeleteOne(db.Ctx, bson.M{
 		"_id":   objID,
 		"owner": user,
 	})
@@ -193,7 +189,7 @@ func PinsRequestidGet(c *gin.Context) {
 		return
 	}
 
-	res := db.Collection.FindOne(db.Ctx, bson.M{
+	res := db.Pins.FindOne(db.Ctx, bson.M{
 		"_id":   objID,
 		"owner": user,
 	})
@@ -240,7 +236,7 @@ func PinsRequestidPost(c *gin.Context) {
 	}
 
 	//remove old pin
-	_, err = db.Collection.DeleteOne(db.Ctx, bson.M{
+	_, err = db.Pins.DeleteOne(db.Ctx, bson.M{
 		"_id":   requestID,
 		"owner": user,
 	})
@@ -251,11 +247,7 @@ func PinsRequestidPost(c *gin.Context) {
 	}
 
 	//pin new one
-	res, err := db.Collection.InsertOne(db.Ctx, db.Pin{
-		Cid:   inputData.Cid,
-		Name:  inputData.Name,
-		Owner: user,
-	})
+	res, err := addPin(inputData, user)
 
 	if err != nil {
 		sendErr(c, err)

@@ -10,7 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var Collection *mongo.Collection
+var Pins *mongo.Collection
 var Ctx = context.TODO()
 
 func init() {
@@ -26,5 +26,5 @@ func init() {
 		log.Fatal(err)
 	}
 
-	Collection = client.Database(os.Getenv("MONGO_DB")).Collection("pins")
+	Pins = client.Database(os.Getenv("MONGO_DB")).Collection("pins")
 }
