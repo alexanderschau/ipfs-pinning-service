@@ -1,0 +1,16 @@
+FROM golang:1.16-alpine AS build
+
+WORKDIR /app
+COPY . /app
+
+RUN apk add --update make
+RUN make build-cluster-client
+
+FROM alpine:latest
+
+LABEL org.opencontainers.image.authors="Alexander Schau <alexander@schau.email>"
+LABEL org.opencontainers.image.source="https://github.com/alexanderschau/ipfs-pinning-service"
+
+COPY --from=build /app/bin/cluster-client /bin/cluster-client
+
+ENTRYPOINT [ "cluster-client" ]

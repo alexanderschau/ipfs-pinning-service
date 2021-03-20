@@ -1,0 +1,23 @@
+FROM golang:1.16-alpine AS build
+
+WORKDIR /app
+COPY . /app
+
+RUN apk add --update make
+RUN make build-backend
+
+FROM alpine:latest
+
+LABEL org.opencontainers.image.authors="Alexander Schau <alexander@schau.email>"
+LABEL org.opencontainers.image.source="https://github.com/alexanderschau/ipfs-pinning-service"
+
+COPY --from=build /app/bin/backend /bin/backend
+
+ENV MONGO_URI=
+ENV MONGO_DB=ipfs
+ENV SECRET_KEY=mysecretkey
+ENV STANDARD_CLUSTER=
+
+EXPOSE 3000
+
+ENTRYPOINT [ "backend" ]
