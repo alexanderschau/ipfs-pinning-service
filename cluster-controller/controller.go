@@ -1,0 +1,109 @@
+package clusterController
+
+import (
+	"context"
+	"log"
+	"os"
+	"os/signal"
+
+	db "github.com/alexanderschau/ipfs-pinning-service/database"
+	"github.com/ipfs/go-cid"
+	"github.com/ipfs/ipfs-cluster/api"
+	"github.com/ipfs/ipfs-cluster/api/rest/client"
+	"github.com/robfig/cron"
+	"go.mongodb.org/mongo-driver/bson"
+)
+
+var clusterName = "eu01-dev.clusters.dweb.party"
+
+func StartController() {
+	c := cron.New()
+	c.AddFunc("*/10 * * * * *", func() {
+		log.Println("Start runner")
+		err := Controller()
+		if err != nil {
+			log.Println(err)
+		}
+		log.Println("Finish runner")
+	})
+	go c.Start()
+	sig := make(chan os.Signal)
+	signal.Notify(sig, os.Interrupt, os.Kill)
+	<-sig
+}
+
+func Controller() error {
+	ctx := context.TODO()
+	client, err := client.NewDefaultClient(&client.Config{Host: "localhost", Port: "9094"})
+
+	if err != nil {
+		return err
+	}
+
+	allocations, err := client.Allocations(ctx, api.DataType)
+	if err != nil {
+		return err
+	}
+
+	res, err := db.Pins.Find(db.Ctx, bson.M{"clusters": bson.M{"$all": []string{
+		clusterName,
+	}}})
+
+	if err != nil {
+		return err
+	}
+
+	var pins []db.Pin
+	err = res.All(db.Ctx, &pins)
+
+	if err != nil {
+		return err
+	}
+
+	ruleCids := []string{}
+	for _, pin := range pins {
+		ruleCids = append(ruleCids, pin.Cid)
+	}
+
+	currentCids := []string{}
+	for _, pin := range allocations {
+		currentCids = append(currentCids, pin.Cid.String())
+	}
+
+	//pin all new ones
+	for _, id := range ruleCids {
+		if !contains(currentCids, id) {
+			ID, err := cid.Decode(id)
+			if err != nil {
+				return err
+			}
+
+			_, err = client.Pin(ctx, ID, api.PinOptions{})
+			if err != nil {
+				return err
+			}
+
+			db.Pins.UpdateOne(db.Ctx, bson.M{
+				"cid":    id,
+				"pinned": bson.M{"$nin": []string{clusterName}},
+			}, bson.M{"$push": bson.M{"pinned": clusterName}})
+		}
+	}
+
+	//remove old ones
+	for _, id := range currentCids {
+		if !contains(ruleCids, id) {
+			ID, err := cid.Decode(id)
+			if err != nil {
+				return err
+			}
+
+			_, err = client.Unpin(ctx, ID)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
