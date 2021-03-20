@@ -23,6 +23,12 @@ func sendErr(c *gin.Context, err error) {
 
 //PinsGet - get all pins
 func PinsGet(c *gin.Context) {
+	//check auth
+	check, user := authMiddleware(c)
+	if !check {
+		return
+	}
+
 	Cid := c.Request.URL.Query().Get("cid")
 
 	results := []PinStatus{}
@@ -30,7 +36,7 @@ func PinsGet(c *gin.Context) {
 	if Cid != "" {
 		res := db.Collection.FindOne(db.Ctx, bson.M{
 			"cid":   Cid,
-			"owner": "example",
+			"owner": user,
 		})
 
 		var pin db.Pin
@@ -62,7 +68,7 @@ func PinsGet(c *gin.Context) {
 
 	if Cid == "" {
 		res, err := db.Collection.Find(db.Ctx, bson.M{
-			"owner": "example",
+			"owner": user,
 		})
 
 		if err != nil {
@@ -107,7 +113,12 @@ func PinsGet(c *gin.Context) {
 
 //PinsPost - add new pin
 func PinsPost(c *gin.Context) {
-	//accessToken := strings.Split(c.Request.Header.Get("Authorization"), " ")[1]
+	//check auth
+	check, user := authMiddleware(c)
+	if !check {
+		return
+	}
+
 	jsonData, _ := ioutil.ReadAll(c.Request.Body)
 	var inputData Pin
 	err := json.Unmarshal(jsonData, &inputData)
@@ -119,7 +130,7 @@ func PinsPost(c *gin.Context) {
 	res, err := db.Collection.InsertOne(db.Ctx, db.Pin{
 		Cid:   inputData.Cid,
 		Name:  inputData.Name,
-		Owner: "example",
+		Owner: user,
 	})
 	if err != nil {
 		sendErr(c, err)
@@ -138,6 +149,12 @@ func PinsPost(c *gin.Context) {
 
 //PinsRequestidDelete - delete pin
 func PinsRequestidDelete(c *gin.Context) {
+	//check auth
+	check, user := authMiddleware(c)
+	if !check {
+		return
+	}
+
 	requestID, _ := c.Params.Get("requestid")
 
 	objID, err := primitive.ObjectIDFromHex(requestID)
@@ -148,7 +165,7 @@ func PinsRequestidDelete(c *gin.Context) {
 
 	_, err = db.Collection.DeleteOne(db.Ctx, bson.M{
 		"_id":   objID,
-		"owner": "example",
+		"owner": user,
 	})
 
 	if err != nil {
@@ -161,6 +178,12 @@ func PinsRequestidDelete(c *gin.Context) {
 
 //PinsRequestidGet - get pin by requestID
 func PinsRequestidGet(c *gin.Context) {
+	//check auth
+	check, user := authMiddleware(c)
+	if !check {
+		return
+	}
+
 	requestID, _ := c.Params.Get("requestid")
 
 	objID, err := primitive.ObjectIDFromHex(requestID)
@@ -171,7 +194,8 @@ func PinsRequestidGet(c *gin.Context) {
 	}
 
 	res := db.Collection.FindOne(db.Ctx, bson.M{
-		"_id": objID,
+		"_id":   objID,
+		"owner": user,
 	})
 
 	var pin db.Pin
@@ -198,6 +222,12 @@ func PinsRequestidGet(c *gin.Context) {
 
 //PinsRequestidPost - update pin
 func PinsRequestidPost(c *gin.Context) {
+	//check auth
+	check, user := authMiddleware(c)
+	if !check {
+		return
+	}
+
 	requestID, _ := c.Params.Get("requestid")
 
 	jsonData, _ := ioutil.ReadAll(c.Request.Body)
@@ -211,7 +241,8 @@ func PinsRequestidPost(c *gin.Context) {
 
 	//remove old pin
 	_, err = db.Collection.DeleteOne(db.Ctx, bson.M{
-		"_id": requestID,
+		"_id":   requestID,
+		"owner": user,
 	})
 
 	if err != nil {
@@ -223,7 +254,7 @@ func PinsRequestidPost(c *gin.Context) {
 	res, err := db.Collection.InsertOne(db.Ctx, db.Pin{
 		Cid:   inputData.Cid,
 		Name:  inputData.Name,
-		Owner: "example",
+		Owner: user,
 	})
 
 	if err != nil {
