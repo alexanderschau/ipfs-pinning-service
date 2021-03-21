@@ -84,10 +84,10 @@ func Controller() error {
 				return err
 			}
 
-			db.Pins.UpdateOne(db.Ctx, bson.M{
+			/*db.Pins.UpdateOne(db.Ctx, bson.M{
 				"cid":    id,
 				"pinned": bson.M{"$nin": []string{clusterName}},
-			}, bson.M{"$push": bson.M{"pinned": clusterName}})
+			}, bson.M{"$push": bson.M{"pinned": clusterName}})*/
 		}
 	}
 
@@ -106,5 +106,39 @@ func Controller() error {
 		}
 	}
 
+	//update status list
+	for _, pin := range pins {
+		if !contains(pin.Pinned, clusterName) {
+			id, err := cid.Decode(pin.Cid)
+
+			if err != nil {
+				return err
+			}
+
+			pinStatus, err := client.Status(ctx, id, false)
+
+			if err != nil {
+				return err
+			}
+
+			if checkStatus(pinStatus.PeerMap) {
+				db.Pins.UpdateOne(db.Ctx, bson.M{
+					"cid":    pin.Cid,
+					"pinned": bson.M{"$nin": []string{clusterName}},
+				}, bson.M{"$push": bson.M{"pinned": clusterName}})
+			}
+
+		}
+	}
+
 	return nil
+}
+
+func checkStatus(peers map[string]*api.PinInfoShort) bool {
+	for _, peer := range peers {
+		if peer.Status == api.TrackerStatusPinned {
+			return true
+		}
+	}
+	return false
 }

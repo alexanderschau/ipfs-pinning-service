@@ -9,7 +9,17 @@ import (
 )
 
 func authMiddleware(c *gin.Context) (bool, string) {
-	accessToken := strings.Split(c.Request.Header.Get("Authorization"), " ")[1]
+	authArray := strings.Split(c.Request.Header.Get("Authorization"), " ")
+	if len(authArray) < 2 {
+		c.JSON(http.StatusForbidden, gin.H{
+			"error": gin.H{
+				"reason":  "UNAUTHORIZED",
+				"details": "Access token is missing or invalid",
+			},
+		})
+		return false, ""
+	}
+	accessToken := authArray[1]
 	check, user := auth.CheckAuth(accessToken)
 	if !check {
 		c.JSON(http.StatusForbidden, gin.H{
