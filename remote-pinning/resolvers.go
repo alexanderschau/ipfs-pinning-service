@@ -67,12 +67,18 @@ func PinsPost(c *gin.Context) {
 	}
 	rid := res.InsertedID.(primitive.ObjectID).Hex()
 
+	fmt.Println(dnsaddrFormatter(strings.Split(os.Getenv("STANDARD_CLUSTER"), ",")))
+	delegates, err := dnsaddrFormatter(strings.Split(os.Getenv("STANDARD_CLUSTER"), ","))
+	if err != nil {
+		sendErr(c, err)
+		return
+	}
 	c.JSON(http.StatusAccepted, PinStatus{
 		Requestid: rid,
 		Status:    PINNING,
 		Created:   res.InsertedID.(primitive.ObjectID).Timestamp(),
 		Pin:       inputData,
-		Delegates: strings.Split(os.Getenv("STANDARD_CLUSTER"), ","),
+		Delegates: delegates,
 	})
 }
 
@@ -142,6 +148,12 @@ func PinsRequestidGet(c *gin.Context) {
 		status = PINNED
 	}
 
+	delegates, err := dnsaddrFormatter(strings.Split(os.Getenv("STANDARD_CLUSTER"), ","))
+	if err != nil {
+		sendErr(c, err)
+		return
+	}
+
 	c.JSON(http.StatusOK, PinStatus{
 		Requestid: requestID,
 		Status:    status,
@@ -150,7 +162,7 @@ func PinsRequestidGet(c *gin.Context) {
 			Cid:  pin.Cid,
 			Name: pin.Name,
 		},
-		Delegates: pin.Clusters,
+		Delegates: delegates,
 	})
 }
 
@@ -194,11 +206,17 @@ func PinsRequestidPost(c *gin.Context) {
 
 	rid := res.InsertedID.(primitive.ObjectID).Hex()
 
+	delegates, err := dnsaddrFormatter(strings.Split(os.Getenv("STANDARD_CLUSTER"), ","))
+	if err != nil {
+		sendErr(c, err)
+		return
+	}
+
 	c.JSON(http.StatusAccepted, PinStatus{
 		Requestid: rid,
 		Status:    PINNING,
 		Created:   res.InsertedID.(primitive.ObjectID).Timestamp(),
 		Pin:       inputData,
-		Delegates: strings.Split(os.Getenv("STANDARD_CLUSTER"), ","),
+		Delegates: delegates,
 	})
 }
