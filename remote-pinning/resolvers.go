@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
+	"strings"
 
 	db "github.com/alexanderschau/ipfs-pinning-service/database"
 	"github.com/gin-gonic/gin"
@@ -92,9 +94,14 @@ func PinsGet(c *gin.Context) {
 				return
 			}
 
+			status := PINNING
+			if len(pin.Pinned) > 0 {
+				status = PINNED
+			}
+
 			results = append(results, PinStatus{
 				Requestid: pin.ObjectID,
-				Status:    PINNED,
+				Status:    status,
 				Created:   objID.Timestamp(),
 				Pin: Pin{
 					Cid:  pin.Cid,
@@ -139,7 +146,7 @@ func PinsPost(c *gin.Context) {
 		Status:    PINNING,
 		Created:   res.InsertedID.(primitive.ObjectID).Timestamp(),
 		Pin:       inputData,
-		Delegates: []string{},
+		Delegates: strings.Split(os.Getenv("STANDARD_CLUSTER"), ","),
 	})
 }
 
@@ -204,15 +211,20 @@ func PinsRequestidGet(c *gin.Context) {
 		return
 	}
 
+	status := PINNING
+	if len(pin.Pinned) > 0 {
+		status = PINNED
+	}
+
 	c.JSON(http.StatusOK, PinStatus{
 		Requestid: requestID,
-		Status:    PINNED,
+		Status:    status,
 		Created:   objID.Timestamp(),
 		Pin: Pin{
 			Cid:  pin.Cid,
 			Name: pin.Name,
 		},
-		Delegates: []string{},
+		Delegates: pin.Clusters,
 	})
 }
 
@@ -261,6 +273,6 @@ func PinsRequestidPost(c *gin.Context) {
 		Status:    PINNING,
 		Created:   res.InsertedID.(primitive.ObjectID).Timestamp(),
 		Pin:       inputData,
-		Delegates: []string{},
+		Delegates: strings.Split(os.Getenv("STANDARD_CLUSTER"), ","),
 	})
 }

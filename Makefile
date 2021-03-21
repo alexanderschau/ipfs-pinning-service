@@ -1,5 +1,8 @@
-run:
+run-backend:
 	go run cmd/backend/main.go
+
+run-cluster-client:
+	go run cmd/cluster-client/main.go
 
 build:
 	make build-backend

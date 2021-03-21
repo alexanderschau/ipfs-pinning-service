@@ -13,4 +13,10 @@ LABEL org.opencontainers.image.source="https://github.com/alexanderschau/ipfs-pi
 
 COPY --from=build /app/bin/cluster-client /bin/cluster-client
 
+ENV MONGO_URI=
+ENV MONGO_DB=ipfs
+ENV CLUSTER_DOMAIN=
+ENV CLUSTER_HOSTNAME=
+ENV CLUSTER_PORT=9094
+
 ENTRYPOINT [ "cluster-client" ]

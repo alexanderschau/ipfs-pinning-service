@@ -14,7 +14,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-var clusterName = "eu01-dev.clusters.dweb.party"
+var clusterName = os.Getenv("CLUSTER_DOMAIN")
 
 func StartController() {
 	c := cron.New()
@@ -34,7 +34,8 @@ func StartController() {
 
 func Controller() error {
 	ctx := context.TODO()
-	client, err := client.NewDefaultClient(&client.Config{Host: "localhost", Port: "9094"})
+	client.NewDefaultClient(&client.Config{})
+	client, err := client.NewDefaultClient(&client.Config{Host: os.Getenv("CLUSTER_HOSTNAME"), Port: os.Getenv("CLUSTER_PORT")})
 
 	if err != nil {
 		return err

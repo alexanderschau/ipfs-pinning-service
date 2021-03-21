@@ -13,6 +13,7 @@ LABEL org.opencontainers.image.source="https://github.com/alexanderschau/ipfs-pi
 
 COPY --from=build /app/bin/backend /bin/backend
 
+ENV GIN_MODE=release
 ENV MONGO_URI=
 ENV MONGO_DB=ipfs
 ENV SECRET_KEY=mysecretkey
