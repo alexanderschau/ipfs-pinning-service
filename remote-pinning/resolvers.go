@@ -31,85 +31,11 @@ func PinsGet(c *gin.Context) {
 		return
 	}
 
-	Cid := c.Request.URL.Query().Get("cid")
+	results, err := getPins(c, user)
 
-	results := []PinStatus{}
-
-	if Cid != "" {
-		res := db.Pins.FindOne(db.Ctx, bson.M{
-			"cid":   Cid,
-			"owner": user,
-		})
-
-		var pin db.Pin
-		err := res.Decode(&pin)
-
-		if err != nil {
-			sendErr(c, err)
-			return
-		}
-
-		objID, err := primitive.ObjectIDFromHex(pin.ObjectID)
-
-		if err != nil {
-			sendErr(c, err)
-			return
-		}
-
-		results = append(results, PinStatus{
-			Requestid: pin.ObjectID,
-			Status:    PINNED,
-			Created:   objID.Timestamp(),
-			Pin: Pin{
-				Cid:  Cid,
-				Name: pin.Name,
-			},
-			Delegates: []string{},
-		})
-	}
-
-	if Cid == "" {
-		res, err := db.Pins.Find(db.Ctx, bson.M{
-			"owner": user,
-		})
-
-		if err != nil {
-			sendErr(c, err)
-			return
-		}
-
-		var pins []db.Pin
-		err = res.All(db.Ctx, &pins)
-
-		if err != nil {
-			sendErr(c, err)
-			return
-		}
-
-		for _, pin := range pins {
-			objID, err := primitive.ObjectIDFromHex(pin.ObjectID)
-
-			if err != nil {
-				sendErr(c, err)
-				return
-			}
-
-			status := PINNING
-			if len(pin.Pinned) > 0 {
-				status = PINNED
-			}
-
-			results = append(results, PinStatus{
-				Requestid: pin.ObjectID,
-				Status:    status,
-				Created:   objID.Timestamp(),
-				Pin: Pin{
-					Cid:  pin.Cid,
-					Name: pin.Name,
-				},
-				Delegates: []string{},
-			})
-		}
+	if err != nil {
+		sendErr(c, err)
+		return
 	}
 
 	c.JSON(http.StatusOK, PinResults{
