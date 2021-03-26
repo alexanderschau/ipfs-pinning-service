@@ -14,6 +14,6 @@ jobs:
         run: docker login ghcr.io -u $REGISTRY_USER -p $REGISTRY_PASSWORD
       - name: Build and Publish Images
         env:
-          IMAGE_BACKEND_NAME: ghcr.io/0va/ipfs-pinning-backend
-          IMAGE_CLUSTER_CLIENT_NAME: ghcr.io/0va/ipfs-pinning-cluster-client
-        run: IMAGE_VERSION=commit-${GITHUB_SHA:0:7} make build-images && IMAGE_VERSION=commit-${GITHUB_SHA:0:7} make push-images
+          IMAGE_BACKEND_NAME: ghcr.io/alexanderschau/ipfs-pinning-backend
+          IMAGE_CLUSTER_CLIENT_NAME: ghcr.io/alexanderschau/ipfs-pinning-cluster-client
+        run: IMAGE_VERSION=${GITHUB_SHA:0:7} make build-images && IMAGE_VERSION=${GITHUB_SHA:0:7} make push-images
