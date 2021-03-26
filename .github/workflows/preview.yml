@@ -16,4 +16,4 @@ jobs:
         env:
           IMAGE_BACKEND_NAME: ghcr.io/0va/ipfs-pinning-backend
           IMAGE_CLUSTER_CLIENT_NAME: ghcr.io/0va/ipfs-pinning-cluster-client
-        run: IMAGE_VERSION=commit-${GITHUB_SHA:0:7} && make build-images && make push-images
+        run: IMAGE_VERSION=commit-${GITHUB_SHA:0:7} make build-images && IMAGE_VERSION=commit-${GITHUB_SHA:0:7} make push-images
