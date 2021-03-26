@@ -6,8 +6,6 @@ jobs:
     steps:
       - name: Check out repo
         uses: actions/checkout@v2
-      - name: Build Code
-        run: make build
       - name: Login in to Container Registry
         env:
           REGISTRY_USER:  ${{ secrets.GHCR_USER }}
@@ -18,4 +16,4 @@ jobs:
           IMAGE_VERSION: main-${GITHUB_SHA:0:7}
           IMAGE_BACKEND_NAME: ghcr.io/0va/ipfs-pinning-backend
           IMAGE_CLUSTER_CLIENT_NAME: ghcr.io/0va/ipfs-pinning-cluster-client
-        run: make build-images && push-images
+        run: echo $IMAGE_BACKEND_NAME:$IMAGE_VERSION && make build-images && make push-images
