@@ -19,5 +19,5 @@ build-images:
 	docker build . -f Dockerfile.clusterClient -t ${IMAGE_CLUSTER_CLIENT_NAME}:${IMAGE_VERSION}
 
 push-images:
-	docker push $IMAGE_BACKEND_NAME:$IMAGE_VERSION
-	docker push $IMAGE_CLUSTER_CLIENT_NAME:$IMAGE_VERSION
+	docker push ${IMAGE_BACKEND_NAME}:${IMAGE_VERSION}
+	docker push ${IMAGE_CLUSTER_CLIENT_NAME}:${IMAGE_VERSION}
