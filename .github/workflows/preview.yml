@@ -1,0 +1,21 @@
+name: Code Preview
+on: [push]
+jobs:
+  push_to_registry:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v2
+      - name: Build Code
+        run: make build
+      - name: Login in to Container Registry
+        env:
+          REGISTRY_USER:  ${{ secrets.GHCR_USER }}
+          REGISTRY_PASSWORD: ${{ secrets.GHCR_PASSWORD }}
+        run: docker login ghcr.io -u $REGISTRY_USER -p $REGISTRY_PASSWORD
+      - name: Build and Publish Images
+        env:
+          IMAGE_VERSION: main-${GITHUB_SHA:0:7}
+          IMAGE_BACKEND_NAME: ghcr.io/0va/ipfs-pinning-backend
+          IMAGE_CLUSTER_CLIENT_NAME: ghcr.io/0va/ipfs-pinning-cluster-client
+        run: make build-images && push-images
