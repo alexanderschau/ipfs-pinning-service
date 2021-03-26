@@ -6,7 +6,7 @@ jobs:
     steps:
       - name: Check out repo
         uses: actions/checkout@v2
-      - run: commit-${GITHUB_SHA:0:7}
+      - run: echo commit-${GITHUB_SHA:0:7}
       - name: Login in to Container Registry
         env:
           REGISTRY_USER:  ${{ secrets.GHCR_USER }}
