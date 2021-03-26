@@ -8,8 +8,8 @@ require (
 	github.com/ipfs/go-cid v0.0.7
 	github.com/ipfs/ipfs-cluster v0.13.1
 	github.com/joho/godotenv v1.3.0
-	github.com/multiformats/go-multiaddr v0.3.1 // indirect
-	github.com/multiformats/go-multiaddr-dns v0.2.0 // indirect
+	github.com/multiformats/go-multiaddr v0.3.1
+	github.com/multiformats/go-multiaddr-dns v0.2.0
 	github.com/robfig/cron v1.2.0
 	go.mongodb.org/mongo-driver v1.5.0
 )

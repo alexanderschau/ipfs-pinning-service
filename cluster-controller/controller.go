@@ -18,7 +18,7 @@ var clusterName = os.Getenv("CLUSTER_DOMAIN")
 
 func StartController() {
 	c := cron.New()
-	c.AddFunc("*/10 * * * * *", func() {
+	c.AddFunc("*/2 * * * * *", func() {
 		log.Println("Start runner")
 		err := Controller()
 		if err != nil {
@@ -83,11 +83,6 @@ func Controller() error {
 			if err != nil {
 				return err
 			}
-
-			/*db.Pins.UpdateOne(db.Ctx, bson.M{
-				"cid":    id,
-				"pinned": bson.M{"$nin": []string{clusterName}},
-			}, bson.M{"$push": bson.M{"pinned": clusterName}})*/
 		}
 	}
 
