@@ -2,12 +2,14 @@ package remotePinning
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	db "github.com/alexanderschau/ipfs-pinning-service/database"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func getPins(c *gin.Context, user string) ([]PinStatus, error) {
@@ -17,10 +19,12 @@ func getPins(c *gin.Context, user string) ([]PinStatus, error) {
 	status := c.Request.URL.Query().Get("status")
 	before := c.Request.URL.Query().Get("before")
 	after := c.Request.URL.Query().Get("after")
+	limit := c.Request.URL.Query().Get("limit")
 
 	filter := bson.M{
 		"owner": user,
 	}
+	opt := options.Find()
 
 	if cid != "" {
 		filter["cid"] = cid
@@ -76,8 +80,18 @@ func getPins(c *gin.Context, user string) ([]PinStatus, error) {
 		filter["_id"] = res
 	}
 
+	if limit != "" {
+		limitInt, err := strconv.ParseInt(limit, 10, 64)
+
+		if err != nil {
+			return results, err
+		}
+
+		opt.SetLimit(limitInt)
+	}
+
 	//run search
-	res, err := db.Pins.Find(db.Ctx, filter)
+	res, err := db.Pins.Find(db.Ctx, filter, opt)
 
 	if err != nil {
 		return results, err
