@@ -2,6 +2,7 @@ package remotePinning
 
 import (
 	"fmt"
+	"time"
 
 	db "github.com/alexanderschau/ipfs-pinning-service/database"
 	"github.com/gin-gonic/gin"
@@ -14,6 +15,8 @@ func getPins(c *gin.Context, user string) ([]PinStatus, error) {
 	cid := c.Request.URL.Query().Get("cid")
 	name := c.Request.URL.Query().Get("name")
 	status := c.Request.URL.Query().Get("status")
+	before := c.Request.URL.Query().Get("before")
+	after := c.Request.URL.Query().Get("after")
 
 	filter := bson.M{
 		"owner": user,
@@ -33,6 +36,44 @@ func getPins(c *gin.Context, user string) ([]PinStatus, error) {
 		} else {
 			filter["pinned"] = bson.M{"$size": 0}
 		}
+	}
+
+	if before != "" || after != "" {
+		res := bson.M{}
+
+		if before != "" {
+			t, err := time.Parse(time.RFC3339, before)
+
+			if err != nil {
+				return results, err
+			}
+
+			oid, err := primitive.ObjectIDFromHex(fmt.Sprintf("%X0000000000000000", t.Unix()))
+
+			if err != nil {
+				return results, err
+			}
+
+			res["$lt"] = oid
+		}
+
+		if after != "" {
+			t, err := time.Parse(time.RFC3339, after)
+
+			if err != nil {
+				return results, err
+			}
+
+			oid, err := primitive.ObjectIDFromHex(fmt.Sprintf("%X0000000000000000", t.Unix()))
+
+			if err != nil {
+				return results, err
+			}
+
+			res["$gt"] = oid
+		}
+
+		filter["_id"] = res
 	}
 
 	//run search
