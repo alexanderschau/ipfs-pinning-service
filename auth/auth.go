@@ -15,6 +15,10 @@ func CheckAuth(authToken string) (bool, string) {
 		return false, ""
 	}
 
+	if token.Claims.(jwt.MapClaims)["name"] == nil {
+		return false, ""
+	}
+
 	user := token.Claims.(jwt.MapClaims)["name"].(string)
 
 	if user == "" {
