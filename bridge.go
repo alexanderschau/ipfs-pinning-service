@@ -2,6 +2,7 @@ package pinning
 
 import (
 	"context"
+	"net/http"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -29,6 +30,26 @@ func ErrorResponse(statusCode int, details string) (openapi.ImplResponse, error)
 			Details: details,
 		},
 	}), nil
+}
+
+// PinCreationStatusResponse - return this, if a new pin was added
+func PinCreationStatusResponse(pinStatus openapi.PinStatus) (openapi.ImplResponse, error) {
+	return openapi.Response(http.StatusCreated, pinStatus), nil
+}
+
+// PinStatusResponse - return this on PinsRequestidGet
+func PinStatusResponse(pinStatus openapi.PinStatus) (openapi.ImplResponse, error) {
+	return openapi.Response(http.StatusOK, pinStatus), nil
+}
+
+// DeleteResponse - return this on PinsRequestidDelete
+func DeleteResponse() (openapi.ImplResponse, error) {
+	return openapi.Response(http.StatusOK, nil), nil
+}
+
+// PinListResponse - return a list of pins (used in PinsGet)
+func PinListResponse(pinResults openapi.PinResults) (openapi.ImplResponse, error) {
+	return openapi.Response(http.StatusOK, pinResults), nil
 }
 
 type PinsGetInputData struct {
