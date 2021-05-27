@@ -53,8 +53,11 @@ func DeleteResponse() Response {
 }
 
 // PinListResponse - return a list of pins (used in PinsGet)
-func PinListResponse(pinResults openapi.PinResults) Response {
-	resp := openapi.Response(http.StatusOK, pinResults)
+func PinListResponse(pinList []openapi.PinStatus) Response {
+	resp := openapi.Response(http.StatusOK, openapi.PinResults{
+		Count:   int32(len(pinList)),
+		Results: pinList,
+	})
 	return Response{resp, nil}
 }
 
