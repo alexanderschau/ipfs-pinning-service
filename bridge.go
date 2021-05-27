@@ -27,6 +27,7 @@ func NewPinsApiController(s openapi.PinsApiServicer) openapi.Router {
 func ErrorResponse(statusCode int, details string) (openapi.ImplResponse, error) {
 	return openapi.Response(statusCode, openapi.Failure{
 		Error: openapi.FailureError{
+			Reason:  http.StatusText(statusCode),
 			Details: details,
 		},
 	}), nil
