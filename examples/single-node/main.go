@@ -10,7 +10,7 @@ import (
 func main() {
 	log.Printf("Server started")
 
-	PinsApiService := pinning.NewPinsApiService()
+	PinsApiService := pinning.NewPinsApiService(pinning.Service{})
 	PinsApiController := pinning.NewPinsApiController(PinsApiService)
 
 	router := pinning.NewRouter(PinsApiController)
